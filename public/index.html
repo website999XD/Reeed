@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BetMC Texture Generator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        background: #000;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* 🔹 พื้นหลังเบลอทั้งหน้า */
+      .bg-blur {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("https://i.postimg.cc/DfBMxHYk/Ai-Hoshino-Oshi-no-ko-Mobile-Wallpaper.jpg")
+          no-repeat center center;
+        background-size: cover;
+        filter: blur(12px);
+        z-index: -2;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: -1;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: fadeInUp 0.8s ease-out;
+        color: white;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          90deg,
+          red,
+          orange,
+          yellow,
+          lime,
+          cyan,
+          blue,
+          magenta,
+          red
+        );
+        background-size: 300%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: animateRGB 4s linear infinite;
+      }
+
+      @keyframes animateRGB {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .header p {
+        color: #eee;
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .form-group input {
+        padding: 12px 16px;
+        border: 2px solid #ccc;
+        border-radius: 12px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: #000;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        width: 100%;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .file-input-display {
+        padding: 12px 16px;
+        border: 2px dashed #ddd;
+        border-radius: 12px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.7);
+        color: #333;
+        cursor: pointer;
+      }
+
+      .file-input-display.has-file {
+        border-color: #28a745;
+        color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+      }
+
+      .submit-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        display: none;
+      }
+
+      .result.success {
+        background: rgba(40, 167, 69, 0.1);
+        border: 2px solid #28a745;
+        color: #28a745;
+        display: block;
+      }
+
+      .result.error {
+        background: rgba(220, 53, 69, 0.1);
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        display: block;
+      }
+
+      .download-link {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 15px;
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .container {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-blur"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="container">
+      <div class="header">
+        <h1>🎮 BetMC Texture Generator</h1>
+        <p>Create beautiful Minecraft texture packs with ease</p>
+      </div>
+
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="textureName">📦 Texture Pack Name</label>
+            <input
+              type="text"
+              id="textureName"
+              name="textureName"
+              required
+              placeholder="Enter pack name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="fps">🎬 FPS</label>
+            <input
+              type="number"
+              id="fps"
+              name="fps"
+              step="0.01"
+              required
+              placeholder="30.0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="quality">⚡ Quality (0–100)</label>
+            <input
+              type="number"
+              id="quality"
+              name="quality"
+              min="0"
+              max="100"
+              required
+              placeholder="85"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="video">🎥 Video (.mp4)</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="video" name="video" accept=".mp4" />
+              <div class="file-input-display" data-text="Choose video file">
+                📁 Choose video file
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="audio">🎵 Audio (.mp3)</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="audio" name="audio" accept=".mp3" />
+              <div class="file-input-display" data-text="Choose audio file">
+                📁 Choose audio file
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="icon">🖼️ Icon (.png)</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="icon" name="icon" accept=".png" />
+              <div class="file-input-display" data-text="Choose icon">
+                📁 Choose icon file
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="manifest">📋 Manifest (.json)</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="manifest" name="manifest" accept=".json" />
+              <div class="file-input-display" data-text="Choose manifest">
+                📁 Choose manifest
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="sounds_zip">🔊 Sounds (.zip)</label>
+            <div class="file-input-wrapper">
+              <input
+                type="file"
+                id="sounds_zip"
+                name="sounds_zip"
+                accept=".zip"
+              />
+              <div class="file-input-display" data-text="Choose sounds zip">
+                📁 Choose sounds zip
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          🚀 Generate Texture Pack
+        </button>
+      </form>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <script>
+      document.querySelectorAll('input[type="file"]').forEach((input) => {
+        input.addEventListener("change", function () {
+          const display = this.parentElement.querySelector(
+            ".file-input-display",
+          );
+          display.textContent = this.files.length
+            ? "📁 " + this.files[0].name
+            : display.dataset.text;
+          display.classList.toggle("has-file", this.files.length > 0);
+        });
+      });
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const result = document.getElementById("result");
+          result.className = "result";
+
+          try {
+            const response = await fetch("/upload", {
+              method: "POST",
+              body: formData,
+            });
+            if (!response.ok) throw new Error();
+            const data = await response.json();
+            result.classList.add("success");
+            result.innerHTML = `<h3>✅ Success!</h3><a class="download-link" href="${data.zip}" download>⬇️ Download</a>`;
+          } catch {
+            result.classList.add("error");
+            result.innerHTML = `<h3>❌ Error generating texture pack.</h3>`;
+          }
+        });
+    </script>
+  </body>
+</html>
